@@ -40,7 +40,13 @@
       </div>
     </div>
 
-    <!-- Tombol Aksi (Launch, Abort, Wait, Resume) -->
+    <!-- Bar Status -->
+    <div class="status-bar">
+      <p>Status: <span>{{ status }}</span></p>
+      <button v-if="status !== 'Idle'" @click="confirmAction">Confirm</button>
+    </div>
+
+    <!-- Panel Tombol Aksi (Launch, Abort, Wait, Resume) -->
     <div class="actions-panel">
       <button v-for="action in actions" :key="action" @click="handleAction(action)">
         {{ action }}
@@ -55,6 +61,7 @@ export default {
   data() {
     return {
       actions: ["Launch", "Abort", "Wait", "Resume"],
+      status: "Idle",
     };
   },
   methods: {
@@ -63,7 +70,11 @@ export default {
       window.history.back();
     },
     handleAction(action) {
-      alert(`Action clicked: ${action}`);
+      this.status = action;
+    },
+    confirmAction() {
+      alert(`Confirmed action: ${this.status}`);
+      this.status = "Idle";
     },
   },
 };
@@ -119,14 +130,14 @@ export default {
 /* Kotak Persegi Kiri */
 .left-square {
   position: absolute;
-  top: 150px;
+  top: 100px;
   left: 200px;
 }
 
 /* Kotak Persegi Kanan */
 .right-square {
   position: absolute;
-  top: 150px;
+  top: 100px;
   right: 200px;
 }
 
@@ -135,14 +146,11 @@ export default {
   position: absolute;
   bottom: 40px;
   left: 50px;
-  /* Lebar diperbesar agar muat 4 panel dalam 1 baris */
   width: 1000px;
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 10px;
   padding: 20px;
   box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-  
-  /* Flex horizontal tanpa wrap */
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -157,6 +165,42 @@ export default {
 .info-section p {
   margin: 0;
   font-size: 1rem;
+}
+
+/* Bar Status */
+.status-bar {
+  position: absolute;
+  bottom: 140px; /* Diletakkan di atas panel aksi */
+  right: 200px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 72px; /* Tinggi frame tetap sama */
+}
+
+/* Font di status-bar dibuat dua kali lebih besar */
+.status-bar span {
+  font-weight: bold;
+  font-size: 2em;
+}
+
+/* Tombol Confirm dibuat dua kali lebih besar */
+.status-bar button {
+  background-color: #008CBA;
+  color: white;
+  border: none;
+  padding: 10px 20px; /* padding yang lebih besar */
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 2em;
+}
+
+.status-bar button:hover {
+  background-color: #005f73;
 }
 
 /* Panel Tombol Aksi di bagian bawah kanan */

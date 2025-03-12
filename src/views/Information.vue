@@ -23,39 +23,61 @@
       <div class="camera-feed" v-for="n in 4" :key="n"></div>
     </div>
 
-    <!-- Frame untuk Tombol Aksi -->
-    <div class="actions-frame">
-      <div class="actions-container">
-        <button v-for="action in actions" :key="action">{{ action }}</button>
-      </div>
+    <!-- Bar Status dengan tombol konfirmasi -->
+    <div class="status-bar">
+      <p>Status: <span>{{ status }}</span></p>
+      <button v-if="status !== 'Idle'" @click="confirmAction">Confirm</button>
+    </div>
+
+    <!-- Tombol Aksi (Launch, Abort, Wait, Resume) -->
+    <div class="actions-panel">
+      <button v-for="action in actions" :key="action" @click="handleAction(action)">
+        {{ action }}
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import { useRobotStore } from "/home/nfl/Desktop/ambavue/src/stores/store.js"; // pastikan path-nya sesuai
+
 export default {
   name: "App",
+  computed: {
+    infoData() {
+      // Mengambil data langsung dari store
+      const store = useRobotStore();
+      return {
+        "Position x": store.dataRobot.pos_x,
+        "Position y": store.dataRobot.pos_y,
+        "Position Theta": store.dataRobot.pos_theta,
+        "V_X": store.dataRobot.v_x,
+        "V_Y": store.dataRobot.v_y,
+        "V_Theta": store.dataRobot.v_theta,
+        "Status": store.bs2pc.status, // ambil status dari store, misal: 0
+        "Tujuan x": store.bs2pc.tujuan_x,
+        "Tujuan y": store.bs2pc.tujuan_y,
+        "Map status": store.utils.mapStatus,
+        "Check status": "OK",
+      };
+    },
+  },
   data() {
     return {
-      infoData: {
-        "Position x": 0,
-        "Position y": 0,
-        "Position Theta": 0,
-        "V_X": 0,
-        "V_Y": 0,
-        "V_Theta": 0,
-        "Status": "Idle",
-        "Tujuan x": 0,
-        "Tujuan y": 0,
-        "Map status": "Active",
-        "Check status": "OK",
-      },
       actions: ["Launch", "Abort", "Wait", "Resume"],
+      status: "Idle",
     };
   },
   methods: {
     goHome() {
       window.location.href = "/"; // Kembali ke halaman utama
+    },
+    handleAction(action) {
+      this.status = action;
+    },
+    confirmAction() {
+      alert(`Confirmed action: ${this.status}`);
+      this.status = "Idle";
     },
   },
 };
@@ -101,7 +123,7 @@ export default {
 .info-panel {
   position: absolute;
   top: 143px;
-  left: 49px;
+  left: 1100px;
   width: 592px;
   min-height: 481px;
   background-color: rgba(255, 255, 255, 0.8);
@@ -135,7 +157,7 @@ export default {
 .camera-container {
   position: absolute;
   top: 98px;
-  left: 802px;
+  left: 102px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, auto);
@@ -146,54 +168,76 @@ export default {
 }
 
 .camera-feed {
-  width: 400px;
-  height: 400px;
+  width: 450px;
+  height: 360px;
   background-color: rgba(0, 0, 0, 0.8);
   border-radius: 11px;
   background-image: url("/anomali.jpeg");
   background-size: cover;
 }
 
-/* Frame Tombol Aksi */
-.actions-frame {
+/* Bar Status */
+.status-bar {
   position: absolute;
-  top: 710px;
-  left: 215px;
-  width: 215px;
-  height: 215px;
-  background-color: white;
-  border-radius: 11px;
+  bottom: 140px; /* Diletakkan di atas panel aksi */
+  right: 200px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  gap: 10px;
+  height: 72px; /* Tinggi frame tetap sama */
 }
 
-/* Container Tombol Aksi */
-.actions-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+/* Font di status-bar dibuat dua kali lebih besar */
+.status-bar span {
+  font-weight: bold;
+  font-size: 2em;
 }
 
-/* Tombol Aksi */
-.actions-container button {
-  width: 86px;
-  height: 86px;
-  border: none;
-  background-color: black;
+/* Tombol Confirm dibuat dua kali lebih besar */
+.status-bar button {
+  background-color: #008CBA;
   color: white;
-  font-weight: 600;
-  font-size: 14px;
+  border: none;
+  padding: 10px 20px; /* padding yang lebih besar */
+  border-radius: 10px;
   cursor: pointer;
+  font-size: 2em;
+}
+
+.status-bar button:hover {
+  background-color: #005f73;
+}
+
+
+/* Panel Tombol Aksi di bagian bawah kanan */
+.actions-panel {
+  position: absolute;
+  bottom: 40px;
+  right: 50px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.actions-panel button {
+  width: 150px;
+  height: 75px;
+  background-color: #000;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
   transition: background-color 0.3s ease;
 }
 
-/* Efek hover: tombol berubah warna hijau terang */
-.actions-container button:hover {
+.actions-panel button:hover {
   background-color: #00FF00;
 }
 </style>

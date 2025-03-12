@@ -30,7 +30,7 @@
     <!-- Bar Bawah (status baterai, jam, dan ikon user) -->
     <div class="bottom-bar">
       <div class="status-left">100%</div>
-      <div class="status-center">22 : 41</div>
+      <div class="status-center">{{ currentTime }}</div>
       <div class="status-right"></div>
     </div>
   </div>
@@ -39,6 +39,23 @@
 <script>
 export default {
   name: "Home",
+  data() {
+    return {
+      currentTime: "",
+    };
+  },
+  mounted() {
+    this.updateTime();
+    setInterval(this.updateTime, 1000); // Perbarui setiap detik
+  },
+  methods: {
+    updateTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      this.currentTime = `${hours} : ${minutes}`;
+    },
+  },
 };
 </script>
 
