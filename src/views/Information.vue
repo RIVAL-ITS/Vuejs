@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="page-container" :style="containerStyle">
     <!-- Tombol Kembali -->
     <div class="back-button" @click="goHome"></div>
 
@@ -39,13 +39,22 @@
 </template>
 
 <script>
-import { useRobotStore } from "/home/nfl/Desktop/ambavue/src/stores/store.js"; // pastikan path-nya sesuai
+import { useRobotStore } from "/src/stores/store.js";
 
 export default {
   name: "App",
+  data() {
+    return {
+      actions: ["Launch", "Abort", "Wait", "Resume"],
+      status: "Idle",
+      containerStyle: {
+        width: `${window.innerWidth}px`,
+        height: `${window.innerHeight}px`
+      }
+    };
+  },
   computed: {
     infoData() {
-      // Mengambil data langsung dari store
       const store = useRobotStore();
       return {
         "Position x": store.dataRobot.pos_x,
@@ -54,23 +63,17 @@ export default {
         "V_X": store.dataRobot.v_x,
         "V_Y": store.dataRobot.v_y,
         "V_Theta": store.dataRobot.v_theta,
-        "Status": store.bs2pc.status, // ambil status dari store, misal: 0
+        "Status": store.bs2pc.status,
         "Tujuan x": store.bs2pc.tujuan_x,
         "Tujuan y": store.bs2pc.tujuan_y,
         "Map status": store.utils.mapStatus,
         "Check status": "OK",
       };
-    },
-  },
-  data() {
-    return {
-      actions: ["Launch", "Abort", "Wait", "Resume"],
-      status: "Idle",
-    };
+    }
   },
   methods: {
     goHome() {
-      window.location.href = "/"; // Kembali ke halaman utama
+      window.location.href = "/";
     },
     handleAction(action) {
       this.status = action;
@@ -79,23 +82,29 @@ export default {
       alert(`Confirmed action: ${this.status}`);
       this.status = "Idle";
     },
+    updateContainerSize() {
+      this.containerStyle.width = `${window.innerWidth}px`;
+      this.containerStyle.height = `${window.innerHeight}px`;
+    }
   },
+  mounted() {
+    window.addEventListener("resize", this.updateContainerSize);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.updateContainerSize);
+  }
 };
 </script>
 
 <style scoped>
-/* Kontainer utama dengan ukuran baru 1850px x 968px */
 .page-container {
   position: relative;
-  width: 1850px;
-  height: 968px;
   margin: auto;
   background: url("/Image1.jpeg") no-repeat center center;
   background-size: cover;
   overflow: hidden;
 }
 
-/* Tombol Kembali */
 .back-button {
   position: absolute;
   top: 14px;

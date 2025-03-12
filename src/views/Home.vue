@@ -1,8 +1,7 @@
 <template>
-  <div class="page-container">
+  <div class="page-container" :style="{ width: screenWidth + 'px', height: screenHeight + 'px' }">
     <!-- Daftar Tombol di Tengah (Information, Camera View, Navigation) -->
     <div class="menu-container">
-      <!-- Tombol Information -->
       <router-link to="/information">
         <div class="menu-item">
           <div class="menu-icon info-icon"></div>
@@ -10,7 +9,6 @@
         </div>
       </router-link>
 
-      <!-- Tombol Camera View -->
       <router-link to="/camera">
         <div class="menu-item">
           <div class="menu-icon camera-icon"></div>
@@ -18,7 +16,6 @@
         </div>
       </router-link>
 
-      <!-- Tombol Navigation -->
       <router-link to="/navigation">
         <div class="menu-item">
           <div class="menu-icon nav-icon"></div>
@@ -41,14 +38,25 @@ export default {
   name: "Home",
   data() {
     return {
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
       currentTime: "",
     };
   },
   mounted() {
+    this.updateScreenSize();
+    window.addEventListener("resize", this.updateScreenSize);
     this.updateTime();
-    setInterval(this.updateTime, 1000); // Perbarui setiap detik
+    setInterval(this.updateTime, 1000);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.updateScreenSize);
   },
   methods: {
+    updateScreenSize() {
+      this.screenWidth = window.innerWidth;
+      this.screenHeight = window.innerHeight;
+    },
     updateTime() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, "0");
@@ -60,11 +68,8 @@ export default {
 </script>
 
 <style scoped>
-/* Kontainer utama dengan ukuran baru 1850 x 968px */
 .page-container {
   position: relative;
-  width: 1850px;
-  height: 968px;
   margin: auto;
   background: url("/Image1.jpeg") no-repeat center center;
   background-size: cover;
@@ -79,21 +84,21 @@ export default {
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  gap: 34px; /* Gap disesuaikan (48px * 0.717 ≈ 34px) */
+  gap: 34px;
   align-items: center;
 }
 
-/* Setiap tombol menu telah diskalakan */
+/* Setiap tombol menu */
 .menu-item {
   position: relative;
-  width: 466px;  /* 650px * 0.717 ≈ 466px */
-  height: 100px; /* 140px * 0.717 ≈ 100px */
+  width: 466px;
+  height: 100px;
   background: #000;
-  border-radius: 36px; /* 50px * 0.717 ≈ 36px */
+  border-radius: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;  /* Gap antar elemen di dalam tombol, disesuaikan */
+  gap: 12px;
   cursor: pointer;
 }
 
@@ -102,20 +107,19 @@ export default {
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
-  font-size: 29px; /* 40px * 0.717 ≈ 29px */
+  font-size: 29px;
   line-height: 120%;
   letter-spacing: -0.01em;
 }
 
 /* Ikon pada tombol menu */
 .menu-icon {
-  width: 46px; /* 64px * 0.717 ≈ 46px */
-  height: 46px; /* 64px * 0.717 ≈ 46px */
+  width: 46px;
+  height: 46px;
   background-color: #fff;
   border-radius: 50%;
 }
 
-/* Ikon khusus */
 .info-icon {
   background-image: url("/info.jpeg");
   background-size: contain;
@@ -144,7 +148,7 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
-  height: 72px; /* 100px * 0.717 ≈ 72px */
+  height: 72px;
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 999px;
   display: flex;
@@ -154,18 +158,16 @@ export default {
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-weight: 1000;
-  font-size: 23px; /* (2rem ≈ 32px * 0.717) */
+  font-size: 23px;
 }
 
-/* Ukuran teks tengah pada status bar */
 .status-center {
-  font-size: 34px; /* (3rem ≈ 48px * 0.717) */
+  font-size: 34px;
 }
 
-/* Ukuran ikon user */
 .status-right {
-  width: 46px; /* 64px * 0.717 ≈ 46px */
-  height: 46px; /* 64px * 0.717 ≈ 46px */
+  width: 46px;
+  height: 46px;
   background-color: #fff;
   border-radius: 50%;
 }

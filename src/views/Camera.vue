@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" :style="{ width: screenWidth + 'px', height: screenHeight + 'px' }">
     <!-- Tombol Back -->
     <div class="back-button" @click="goBack"></div>
 
@@ -31,14 +31,27 @@ export default {
   name: "CameraView",
   data() {
     return {
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
       buttons: ["Launch", "Abort", "Wait", "Resume"],
       streamUrl: "http://10.7.101.152:8080/stream?topic=/image_raw",
-      status: "Idle"
+      status: "Idle",
     };
   },
+  mounted() {
+    this.updateScreenSize();
+    window.addEventListener("resize", this.updateScreenSize);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.updateScreenSize);
+  },
   methods: {
+    updateScreenSize() {
+      this.screenWidth = window.innerWidth;
+      this.screenHeight = window.innerHeight;
+    },
     goBack() {
-      window.location.href = "/"; // Kembali ke halaman utama
+      window.location.href = "/";
     },
     handleAction(action) {
       this.status = action;
@@ -46,16 +59,14 @@ export default {
     confirmAction() {
       alert(`Confirmed action: ${this.status}`);
       this.status = "Idle";
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
 /* Container Utama */
 .container {
-  width: 1850px;
-  height: 968px;
   background: url("/Image1.jpeg") no-repeat center center;
   background-size: cover;
   display: flex;
@@ -63,6 +74,7 @@ export default {
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 }
 
 /* Tombol Back */
@@ -108,7 +120,7 @@ export default {
 /* Bar Status */
 .status-bar {
   position: absolute;
-  bottom: 140px; /* Diletakkan di atas panel aksi */
+  bottom: 140px;
   right: 200px;
   background: rgba(255, 255, 255, 0.9);
   padding: 10px 20px;
@@ -117,7 +129,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 72px; /* Tinggi frame tetap sama */
+  height: 72px;
 }
 
 /* Font di status-bar dibuat dua kali lebih besar */
@@ -131,7 +143,7 @@ export default {
   background-color: #008CBA;
   color: white;
   border: none;
-  padding: 10px 20px; /* padding yang lebih besar */
+  padding: 10px 20px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 2em;
