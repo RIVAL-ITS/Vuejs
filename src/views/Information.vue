@@ -4,7 +4,7 @@
     <div class="back-button" @click="goHome"></div>
 
     <!-- Judul Bagian Kiri: Information -->
-    <div class="title-info">Information</div>
+    <div class="title-info">Check camera</div>
 
     <!-- Panel Informasi -->
     <div class="info-panel">
@@ -16,7 +16,7 @@
     </div>
 
     <!-- Judul Bagian Kanan: Check camera -->
-    <div class="camera-title">Check camera</div>
+    <div class="camera-title">Information</div>
 
     <!-- Panel Kamera dengan layout grid 2x2 dan background putih semi transparan -->
     <div class="camera-container">
@@ -201,7 +201,7 @@ export default {
   height: 360px;
   background-color: rgba(0, 0, 0, 0.8);
   border-radius: 11px;
-  background-image: url("/anomali.jpeg");
+  background-image: url("/profil.jpeg");
   background-size: cover;
 }
 
