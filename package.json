@@ -4,18 +4,22 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "concurrently \"npm run vite\" \"npm run rosbridge\" \"npm run camera\" \"npm run open-browser\"",
+    "vite": "vite",
+    "rosbridge": "bash -lc 'source /opt/ros/humble/setup.bash && echo \"Menjalankan rosbridge_server rosbridge_websocket...\" && ros2 run rosbridge_server rosbridge_websocket'",
+    "camera": "bash -lc 'source /opt/ros/humble/setup.bash && source /home/nfl/Downloads/Vuejs/install/setup.bash && echo \"Menjalankan camera_publisher camera_publisher...\" && ros2 run camera_publisher camera_publisher'"
   },
   "dependencies": {
+    "jquery": "^3.7.1",
     "pinia": "^3.0.1",
     "roslib": "^1.4.1",
+    "three": "^0.174.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "concurrently": "^9.1.2",
     "vite": "^6.2.0"
   }
 }

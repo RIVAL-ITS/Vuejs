@@ -68,9 +68,39 @@ export default {
       status: "Idle",
     };
   },
+  mounted() {
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        console.log("Fullscreen exited, re-entering...");
+        this.enterFullScreen();
+      }
+    });
+    this.enterFullScreen();
+  },
   methods: {
     goHome() {
-      window.location.href = "/"; // Kembali ke halaman utama
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+      setTimeout(() => {
+        if (!document.fullscreenElement) {
+          this.enterFullScreen();
+        }
+      }, 500);
+    },
+    enterFullScreen() {
+      const element = document.documentElement;
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
     },
     handleAction(action) {
       this.status = action;
@@ -87,8 +117,7 @@ export default {
 /* Kontainer utama dengan ukuran baru 1850px x 968px */
 .page-container {
   position: relative;
-  width: 1850px;
-  height: 968px;
+  min-height: 100vh;
   margin: auto;
   background: url("/Image1.jpeg") no-repeat center center;
   background-size: cover;
@@ -98,7 +127,7 @@ export default {
 /* Tombol Kembali */
 .back-button {
   position: absolute;
-  top: 14px;
+  top: 30px;
   left: 14px;
   width: 72px;
   height: 72px;

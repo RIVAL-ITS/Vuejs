@@ -1,13 +1,17 @@
 <template>
-  <div class="container">
+  <div id="app">
     <!-- Tombol Back -->
     <div class="back-button" @click="goBack"></div>
 
-    <!-- Tampilan Kamera -->
-    <div class="camera-grid">
-      <div class="camera-box" v-for="n in 4" :key="n">
-        <!-- Menampilkan stream langsung ke dalam camera-box -->
-        <img :src="streamUrl" alt="Camera Stream" class="stream-img" />
+    <!-- Card untuk menampilkan ROS image -->
+    <div class="card" ref="card">
+      <div class="card-header">
+        <h2>{{ title }}</h2>
+      </div>
+      <div class="card-content">
+        <!-- Tampilkan gambar dari ROS jika tersedia -->
+        <img v-if="imageData" :src="imageData" alt="Camera Stream" class="stream-img" />
+        <p v-else>Waiting for image data...</p>
       </div>
     </div>
 
@@ -27,18 +31,79 @@
 </template>
 
 <script>
+import ROSLIB from 'roslib';
+
 export default {
   name: "CameraView",
   data() {
     return {
+      title: "Camera Stream",
       buttons: ["Launch", "Abort", "Wait", "Resume"],
-      streamUrl: "http://10.7.101.152:8080/stream?topic=/image_raw",
-      status: "Idle"
+      status: "Idle",
+      imageData: ""
     };
+  },
+  mounted() {
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        console.log("Fullscreen exited, re-entering...");
+        this.enterFullScreen();
+      }
+    });
+
+    this.enterFullScreen();
+
+    const ros = new ROSLIB.Ros({
+      url: 'ws://localhost:9090'
+    });
+
+    ros.on('connection', () => {
+      console.log('Connected to ROS bridge.');
+    });
+
+    ros.on('error', (error) => {
+      console.error('Error connecting to ROS bridge: ', error);
+    });
+
+    ros.on('close', () => {
+      console.log('Disconnected from ROS bridge.');
+    });
+
+    const imageTopic = new ROSLIB.Topic({
+      ros: ros,
+      name: '/camera_frame/compressed',
+      messageType: 'sensor_msgs/msg/CompressedImage'
+    });
+
+    imageTopic.subscribe((message) => {
+      console.log("Received image message from ROS:", message);
+      this.processImageMessage(message);
+    });
   },
   methods: {
     goBack() {
-      window.location.href = "/"; // Kembali ke halaman utama
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+      setTimeout(() => {
+        if (!document.fullscreenElement) {
+          this.enterFullScreen();
+        }
+      }, 500);
+    },
+    enterFullScreen() {
+      const element = document.documentElement;
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
     },
     handleAction(action) {
       this.status = action;
@@ -46,6 +111,12 @@ export default {
     confirmAction() {
       alert(`Confirmed action: ${this.status}`);
       this.status = "Idle";
+    },
+    processImageMessage(message) {
+      // Asumsikan message.data adalah string base64 dari gambar JPEG.
+      if (message.data) {
+        this.imageData = "data:image/jpeg;base64," + message.data;
+      }
     }
   }
 };
@@ -53,22 +124,19 @@ export default {
 
 <style scoped>
 /* Container Utama */
-.container {
-  width: 1850px;
-  height: 968px;
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  position: relative;
+  min-height: 100vh;
   background: url("/Image1.jpeg") no-repeat center center;
   background-size: cover;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+  padding: 20px;
 }
 
 /* Tombol Back */
 .back-button {
   position: absolute;
-  top: 20px;
+  top: 30px;
   left: 20px;
   width: 72px;
   height: 72px;
@@ -78,37 +146,39 @@ export default {
   cursor: pointer;
 }
 
-/* Grid Kamera */
-.camera-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  position: absolute;
-  top: 20px;
-  left: 100px;
+/* Card Style */
+.card {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 600px;
+  margin: 100px auto 0 auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Kotak Kamera */
-.camera-box {
-  width: 475px;
-  height: 380px;
-  background-color: lightgray;
-  border: 10px solid black;
-  overflow: hidden;
-  position: relative;
+/* Card Header */
+.card-header {
+  margin-bottom: 10px;
 }
 
-/* Gaya untuk menampilkan stream */
+/* Card Content */
+.card-content {
+  min-height: 200px;
+  text-align: center;
+}
+
+/* Gaya untuk stream image */
 .stream-img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
 }
 
 /* Bar Status */
 .status-bar {
   position: absolute;
-  bottom: 140px; /* Diletakkan di atas panel aksi */
+  bottom: 140px;
   right: 200px;
   background: rgba(255, 255, 255, 0.9);
   padding: 10px 20px;
@@ -117,21 +187,21 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 72px; /* Tinggi frame tetap sama */
+  height: 72px;
 }
 
-/* Font di status-bar dibuat dua kali lebih besar */
+/* Status text */
 .status-bar span {
   font-weight: bold;
   font-size: 2em;
 }
 
-/* Tombol Confirm dibuat dua kali lebih besar */
+/* Tombol Confirm */
 .status-bar button {
   background-color: #008CBA;
   color: white;
   border: none;
-  padding: 10px 20px; /* padding yang lebih besar */
+  padding: 10px 20px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 2em;
@@ -147,7 +217,6 @@ export default {
   bottom: 40px;
   right: 50px;
   display: flex;
-  flex-direction: row;
   gap: 20px;
 }
 
@@ -162,11 +231,10 @@ export default {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease;
 }
 
-/* Efek hover untuk tombol aksi: berubah menjadi hijau terang */
 .button-container button:hover {
   background-color: #00FF00;
 }

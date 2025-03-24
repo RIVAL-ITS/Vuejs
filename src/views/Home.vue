@@ -63,8 +63,7 @@ export default {
 /* Kontainer utama dengan ukuran baru 1850 x 968px */
 .page-container {
   position: relative;
-  width: 1850px;
-  height: 968px;
+  min-height: 100vh;
   margin: auto;
   background: url("/Image1.jpeg") no-repeat center center;
   background-size: cover;
